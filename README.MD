@@ -1,3 +1,4 @@
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://gastro-monte-carlo-production.up.railway.app)
 # Gastro Monte Carlo
 
 Symulacja Monte Carlo do optymalizacji zatowarowania na stoisku gastro (ciasta, słoiki, pierogi).
