@@ -337,6 +337,48 @@
     </p>
 </div>
 
+<form method="get" action="/#daily-calc-result" class="day-form">
+    <input type="hidden" name="product" th:value="${selectedProduct}">
+    <div style="margin-bottom:16px;">
+        <strong style="display:block; font-size:17px; margin-bottom:6px;">Ile dziś dopiec?</strong>
+        <span style="display:block; font-size:15px; color:#555; max-width:640px; line-height:1.5;">
+            Podaj dzień tygodnia i to, ile masz teraz na stanie — policzymy, ile dziś dopiec zgodnie z rekomendacją.
+        </span>
+    </div>
+
+    <div style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px;">
+        <div style="display:flex; flex-direction:column;">
+            <label for="calcDay" style="font-size:14px; color:#444; margin-bottom:6px; font-weight:600;">Dzień tygodnia</label>
+            <select id="calcDay" name="calcDay" style="padding:7px 10px; font-size:16px;">
+                <option value="1" th:selected="${calcDay == 1}">Wtorek</option>
+                <option value="2" th:selected="${calcDay == 2}">Środa</option>
+                <option value="3" th:selected="${calcDay == 3}">Czwartek</option>
+                <option value="4" th:selected="${calcDay == 4}">Piątek</option>
+                <option value="5" th:selected="${calcDay == 5}">Sobota</option>
+            </select>
+        </div>
+        <div style="display:flex; flex-direction:column;">
+            <label for="calcStock" style="font-size:14px; color:#444; margin-bottom:6px; font-weight:600;">Aktualny stan magazynu (szt)</label>
+            <input type="number" min="0" id="calcStock" name="calcStock" th:value="${calcStock}"
+                   style="width:100px; padding:7px 10px; text-align:center; border:1px solid #bbb; border-radius:4px; font-size:16px;">
+        </div>
+    </div>
+
+    <button type="submit">Policz</button>
+</form>
+
+<div class="recommendation" id="daily-calc-result" th:if="${calcResult != null}">
+    <h2>Wynik</h2>
+    <p style="font-size:16px; line-height:1.6;">
+        Masz teraz na stanie <strong th:text="${calcStock}"></strong> szt.
+        Rekomendowany poziom zatowarowania to <strong th:text="${fineResult.bestRow().baseStock()}"></strong> szt,
+        więc dziś powinieneś dopiec:
+    </p>
+    <p style="font-size:32px; font-weight:bold; color:#28a745; margin:10px 0;">
+        <span th:text="${calcResult}"></span> szt
+    </p>
+</div>
+
 <p style="color:#999; font-size:13px;">Czas obliczeń: <span th:text="${elapsedMs}"></span> ms</p>
 </body>
 </html>

@@ -6,6 +6,7 @@ import com.riskengine.gastro.RowResult;
 import com.riskengine.gastro.SimulationService;
 import com.riskengine.gastro.demandModel.DemandModel;
 import com.riskengine.gastro.demandModel.SeasonalDemandModelWithVarianceScaling;
+import com.riskengine.gastro.restockPolicy.BaseStockPolicy;
 import com.riskengine.gastro.restockPolicy.RestockPolicy;
 import com.riskengine.gastro.restockPolicy.WeeklyVaryingStockPolicy;
 import org.springframework.stereotype.Controller;
@@ -42,6 +43,9 @@ public class SimulationController {
                            @RequestParam(required = false) Integer demandAdj3,
                            @RequestParam(required = false) Integer demandAdj4,
                            @RequestParam(required = false) Integer demandAdj5,
+
+                           @RequestParam(required = false) Integer calcDay,
+                           @RequestParam(required = false) Integer calcStock,
                            Model model) {
         // TODO: cachowanie wyników symulacji.
         // Problem: każde żądanie (zmiana produktu/modelu) przelicza grid search od nowa,
@@ -104,6 +108,14 @@ public class SimulationController {
 
         model.addAttribute("coarseResult", coarseResult);
         model.addAttribute("fineResult", fineResult);
+
+        if (calcDay != null && calcStock != null) {
+            RestockPolicy policy = new BaseStockPolicy(fineResult.bestRow().baseStock());
+            int toProduceQty = policy.decideProductionAmount(calcStock, calcDay);
+            model.addAttribute("calcDay", calcDay);
+            model.addAttribute("calcStock", calcStock);
+            model.addAttribute("calcResult", toProduceQty);
+        }
 
         // --- Baseline: dodatkowy wynik z oryginalnym popytem, tylko gdy scenariusz aktywny ---
         GridSearchResult baselineFineResult = null;
