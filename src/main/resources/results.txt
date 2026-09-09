@@ -1,0 +1,38 @@
+0. przed inventory (tylko jeden dzien, nie tydzien wiec nie porownuj z reszta danch)
+produkcja=10 | srednia=8209,3  | stdDev=412,5  | cel=8003,0  | cvar5=6011,6
+produkcja=20 | srednia=15586,8 | stdDev=1252,9 | cel=14960,4 | cvar5=10295,6
+produkcja=30 | srednia=20811,5 | stdDev=2475,7 | cel=19573,6 | cvar5=11972,0
+produkcja=40 | srednia=23135,4 | stdDev=3529,2 | cel=21370,8 | cvar5=12285,2
+produkcja=50 | srednia=23440,9 | stdDev=4043,2 | cel=21419,2 | cvar5=11289,6
+produkcja=60 | srednia=22767,2 | stdDev=4225,1 | cel=20654,6 | cvar5=10154,4
+najlepsza produkcja=50 | cel=21419,2
+
+1. bez mnoznikow dla dnia (kazdy dzien taki sam rozklad)
+Dla sredniej popytu kazdego dnia 30szt i odchyleniu 12
+codzienne bazowe zatowarowanie=  10szt | srednia zysku tygodniowego=  5857,4zl | odchylenie zyskow pomiedzy tygodniami=   370,9zl | cel=  5671,9 | zysk w najgorszych 5procentach przypadkow=  4550,6zl
+codzienne bazowe zatowarowanie=  20szt | srednia zysku tygodniowego= 11089,9zl | odchylenie zyskow pomiedzy tygodniami=  1119,8zl | cel= 10530,0 | zysk w najgorszych 5procentach przypadkow=  7885,9zl
+codzienne bazowe zatowarowanie=  30szt | srednia zysku tygodniowego= 14765,6zl | odchylenie zyskow pomiedzy tygodniami=  2159,2zl | cel= 13686,0 | zysk w najgorszych 5procentach przypadkow=  9479,1zl
+codzienne bazowe zatowarowanie=  40szt | srednia zysku tygodniowego= 16278,7zl | odchylenie zyskow pomiedzy tygodniami=  3054,8zl | cel= 14751,3 | zysk w najgorszych 5procentach przypadkow=  9559,0zl
+codzienne bazowe zatowarowanie=  50szt | srednia zysku tygodniowego= 16244,9zl | odchylenie zyskow pomiedzy tygodniami=  3571,0zl | cel= 14459,4 | zysk w najgorszych 5procentach przypadkow=  8697,5zl
+codzienne bazowe zatowarowanie=  60szt | srednia zysku tygodniowego= 15630,8zl | odchylenie zyskow pomiedzy tygodniami=  3706,6zl | cel= 13777,5 | zysk w najgorszych 5procentach przypadkow=  7990,6zl
+najlepsze bazowe zatowarowanie=  40zl | najlepszy wynik po odjeciu ryzyka= 14751,3zl
+
+2. przy mnozeniu o czynnik kazdego dnia sredniej przy takim samym odchyleniu bazowym
+Dla sredniej popytu kazdego dnia 30szt i odchyleniu 12
+codzienne bazowe zatowarowanie=  10szt | srednia zysku tygodniowego=  5357,3zl | odchylenie zyskow pomiedzy tygodniami=   647,0zl | cel=  5033,8 | zysk w najgorszych 5procentach przypadkow=  3786,5zl
+codzienne bazowe zatowarowanie=  20szt | srednia zysku tygodniowego=  9878,0zl | odchylenie zyskow pomiedzy tygodniami=  1328,7zl | cel=  9213,7 | zysk w najgorszych 5procentach przypadkow=  6945,5zl
+codzienne bazowe zatowarowanie=  30szt | srednia zysku tygodniowego= 13305,4zl | odchylenie zyskow pomiedzy tygodniami=  1905,4zl | cel= 12352,7 | zysk w najgorszych 5procentach przypadkow=  9237,2zl
+codzienne bazowe zatowarowanie=  40szt | srednia zysku tygodniowego= 15649,5zl | odchylenie zyskow pomiedzy tygodniami=  2367,8zl | cel= 14465,6 | zysk w najgorszych 5procentach przypadkow= 10675,2zl
+codzienne bazowe zatowarowanie=  50szt | srednia zysku tygodniowego= 16926,9zl | odchylenie zyskow pomiedzy tygodniami=  2817,7zl | cel= 15518,1 | zysk w najgorszych 5procentach przypadkow= 10769,2zl
+codzienne bazowe zatowarowanie=  60szt | srednia zysku tygodniowego= 17217,6zl | odchylenie zyskow pomiedzy tygodniami=  3234,6zl | cel= 15600,3 | zysk w najgorszych 5procentach przypadkow= 10053,4zl
+najlepsze bazowe zatowarowanie=  60zl | najlepszy wynik po odjeciu ryzyka= 15600,3zl
+
+3. Przy mnozeniu odchylenia o ten sam czynnik co srednia
+Dla sredniej popytu kazdego dnia 30szt i odchyleniu 12
+codzienne bazowe zatowarowanie=  10szt | srednia zysku tygodniowego=  5655,8zl | odchylenie zyskow pomiedzy tygodniami=   438,8zl | cel=  5436,4 | zysk w najgorszych 5procentach przypadkow=  4375,6zl
+codzienne bazowe zatowarowanie=  20szt | srednia zysku tygodniowego=  9893,0zl | odchylenie zyskow pomiedzy tygodniami=  1044,0zl | cel=  9371,0 | zysk w najgorszych 5procentach przypadkow=  7077,2zl
+codzienne bazowe zatowarowanie=  30szt | srednia zysku tygodniowego= 12879,0zl | odchylenie zyskow pomiedzy tygodniami=  1730,9zl | cel= 12013,6 | zysk w najgorszych 5procentach przypadkow=  8265,8zl
+codzienne bazowe zatowarowanie=  40szt | srednia zysku tygodniowego= 14766,3zl | odchylenie zyskow pomiedzy tygodniami=  2419,2zl | cel= 13556,7 | zysk w najgorszych 5procentach przypadkow=  8567,1zl
+codzienne bazowe zatowarowanie=  50szt | srednia zysku tygodniowego= 15833,8zl | odchylenie zyskow pomiedzy tygodniami=  3121,8zl | cel= 14272,9 | zysk w najgorszych 5procentach przypadkow=  7979,5zl
+codzienne bazowe zatowarowanie=  60szt | srednia zysku tygodniowego= 16258,1zl | odchylenie zyskow pomiedzy tygodniami=  3753,5zl | cel= 14381,3 | zysk w najgorszych 5procentach przypadkow=  7309,4zl
+najlepsze bazowe zatowarowanie=  60zl | najlepszy wynik po odjeciu ryzyka= 14381,3zl

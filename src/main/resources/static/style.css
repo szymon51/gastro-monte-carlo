@@ -1,0 +1,245 @@
+/* ---------- Podstawa ---------- */
+body {
+    font-family: -apple-system, Arial, sans-serif;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+    color: #222;
+    line-height: 1.5;
+    font-size: 16px;
+}
+
+h1 {
+    border-bottom: 2px solid #333;
+    padding-bottom: 8px;
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 22px;
+}
+
+label {
+    font-weight: bold;
+}
+
+select {
+    padding: 6px 12px;
+    font-size: 15px;
+}
+
+button {
+    padding: 8px 16px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #555;
+}
+
+/* ---------- Formularze dzienne (strategia + zmiana popytu) ---------- */
+.day-form {
+    margin: 20px 0;
+    padding: 18px 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.day-form-label {
+    margin-bottom: 16px;
+}
+
+.day-form-label strong {
+    display: block;
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+
+.day-form-hint {
+    display: block;
+    font-size: 15px;
+    color: #555;
+    max-width: 640px;
+    line-height: 1.5;
+}
+
+/* Rząd pól / suwaków */
+.day-inputs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.day-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.day-cell label {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.target-input {
+    width: 46px;
+    padding: 7px 0;
+    text-align: center;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: content-box;
+}
+
+.slider-cell {
+    display: flex;
+    flex-direction: column;
+    width: 92px;
+}
+
+.slider-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.slider-head span {
+    font-weight: 600;
+    color: #444;
+}
+
+.slider-head output {
+    font-weight: bold;
+    color: #222;
+}
+
+.slider-cell input[type="range"] {
+    width: 92px;
+    margin: 0;
+}
+
+/* ---------- Punkt odniesienia (popyt bazowy) — pod polami ---------- */
+.reference-block {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #d5d5d5;
+}
+
+.reference-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.reference-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    justify-content: flex-start;
+}
+
+.ref-chip {
+    font-size: 15px;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* ---------- Objaśnienia (kolorowy dymek) ---------- */
+.explainer-box {
+    background: #e3edf9;
+    border-left: 5px solid #3d6fa8;
+    padding: 16px 20px;
+    margin: 22px 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #1f3a5f;
+    border-radius: 4px;
+}
+
+/* ---------- Box rekomendacji ---------- */
+.recommendation {
+    background: #d4edda;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.recommendation h2 {
+    margin: 0 0 12px 0;
+    font-size: 24px;
+}
+
+.params-line {
+    font-size: 16px;
+    color: #333;
+    margin: 6px 0;
+}
+
+/* ---------- Tabele ---------- */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 9px 12px;
+    text-align: right;
+    border-bottom: 1px solid #ddd;
+    font-size: 15px;
+}
+
+th:first-child, td:first-child {
+    text-align: left;
+}
+
+th {
+    background: #333;
+    color: white;
+    font-size: 14px;
+}
+
+.mini-table {
+    margin-top: 8px;
+    width: auto;
+}
+
+.mini-table th, .mini-table td {
+    font-size: 14px;
+    padding: 6px 12px;
+}
+
+/* ---------- Kolorowanie kolumn w tabelach porównawczych ----------
+   Pełne kolory (nie przezroczyste), bo tabele leżą wewnątrz
+   już kolorowych boxów — przezroczystość była niewidoczna. */
+.compare-cols th:nth-child(2) {
+    background: #b8860b;
+    color: #fff;
+}
+
+.compare-cols td:nth-child(2) {
+    background: #fdf3d3;
+    font-weight: 600;
+}
+
+.compare-cols th:nth-child(3) {
+    background: #1e7e34;
+    color: #fff;
+}
+
+.compare-cols td:nth-child(3) {
+    background: #dff3e3;
+    font-weight: 600;
+}

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gastro Monte Carlo</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<h1>Gastro Monte Carlo — optymalizacja zatowarowania</h1>
+
+<form method="get" action="/">
+    <label for="product">Produkt:</label>
+    <select name="product" id="product" onchange="this.form.submit()">
+        <option value="ciasta" th:selected="${selectedProduct == 'ciasta'}">Ciasta</option>
+        <option value="sloiki" th:selected="${selectedProduct == 'sloiki'}">Słoiki</option>
+        <option value="pierogi" th:selected="${selectedProduct == 'pierogi'}">Pierogi</option>
+    </select>
+</form>
+
+<p style="background:#e3edf9; border-left:5px solid #3d6fa8; padding:16px 20px; margin:22px 0; font-size:16px; line-height:1.6; color:#1f3a5f; border-radius:4px;">
+    Symulacja sprawdza różne poziomy codziennego bazowego zatowarowania (w sztukach) i szacuje,
+    który z nich daje najlepszy tygodniowy zysk przy uwzględnieniu ryzyka wahań popytu.
+    Wyniki oparte są na 20 000 symulowanych tygodni dla każdego poziomu.
+</p>
+
+<div id="loading" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:999; text-align:center; padding-top:100px; font-size:24px;">
+    Obliczam...
+</div>
+<script>
+    document.querySelectorAll('form').forEach(f =>
+        f.addEventListener('submit', () => {
+            document.getElementById('loading').style.display = 'block';
+        }));
+    document.querySelectorAll('select').forEach(s =>
+        s.addEventListener('change', () =>
+            document.getElementById('loading').style.display = 'block'));
+</script>
+
+<div class="recommendation" th:with="rec=${baselineFineResult != null ? baselineFineResult : fineResult}">
+    <h2>Rekomendacja <span th:text="${rec.product().group()}"></span>:
+        <span th:text="${rec.bestRow().baseStock()}"></span> szt dziennie
+    </h2>
+
+    <p style="font-size:16px; line-height:1.7; margin-bottom:0;">
+        Sprzedajesz <span th:text="${rec.product().group()}"></span> po <strong th:text="${#numbers.formatDecimal(rec.product().price(), 1, 2)}"></strong> zł/szt,
+        przy koszcie produkcji <strong th:text="${#numbers.formatDecimal(unitCost, 1, 2)}"></strong> zł/szt
+        (marża <strong th:text="${#numbers.formatDecimal(rec.product().price() - unitCost, 1, 2)}"></strong> zł/szt)
+        i terminie ważności <strong th:text="${rec.product().shelfLifeDays()}"></strong> dni.
+        Szacowany popyt to średnio <strong th:text="${#numbers.formatDecimal(rec.product().demandMean(), 1, 1)}"></strong> szt dziennie
+        (odchylenie <strong th:text="${#numbers.formatDecimal(rec.product().demandStdDev(), 1, 1)}"></strong> szt),
+        rosnący w ciągu tygodnia — dokładny rozkład na poszczególne dni znajdziesz poniżej.
+    </p>
+
+    <table class="mini-table" style="margin:14px auto; width:auto;">
+        <tr>
+            <th></th>
+            <th th:each="dayName : ${#lists.toList({'Wt','Śr','Czw','Pt','Sob'})}" th:text="${dayName}"></th>
+        </tr>
+        <tr>
+            <td>Szacowany popyt</td>
+            <td th:each="v : ${baseDemandByDay}" th:text="${#numbers.formatDecimal(v, 1, 1)} + ' szt'"></td>
+        </tr>
+        <tr>
+            <td>Śr. faktyczna produkcja</td>
+            <td th:each="v : ${rec.bestRow().avgProducedByDay()}" th:text="${#numbers.formatDecimal(v, 1, 1)} + ' szt'"></td>
+        </tr>
+    </table>
+
+    <p style="font-size:16px; line-height:1.7; margin-top:14px; padding-top:14px; border-top:1px solid rgba(0,0,0,0.15);">
+        Przy zatowarowaniu <strong th:text="${rec.bestRow().baseStock()}"></strong> szt dziennie:
+        w typowym tygodniu zarobisz około
+        <strong th:text="${#numbers.formatDecimal(rec.bestRow().target(), 1, 0)}"></strong> zł
+        (średni zysk <strong th:text="${#numbers.formatDecimal(rec.bestRow().mean(), 1, 0)}"></strong> zł, skorygowany o ryzyko wahań),
+        sprzedając średnio <strong th:text="${#numbers.formatDecimal(rec.bestRow().avgSold(), 1, 1)}"></strong> szt tygodniowo
+        z <strong th:text="${#numbers.formatDecimal(rec.bestRow().avgDemand(), 1, 1)}"></strong> szt szacowanego popytu,
+        ale licz się z wahaniami rzędu ±<strong th:text="${#numbers.formatDecimal(rec.bestRow().stdDev(), 1, 0)}"></strong> zł
+        w zależności od tygodnia.
+        W najgorszych 5% przypadków (mniej więcej raz na miesiąc) zarobisz tylko około
+        <strong th:text="${#numbers.formatDecimal(rec.bestRow().cVar5(), 1, 0)}"></strong> zł.
+        Przy tym poziomie zatowarowania w <strong th:text="${#numbers.formatDecimal(rec.bestRow().stockoutProbability() * 100, 1, 0)}"></strong>%
+        dni (ok. <strong th:text="${#numbers.formatDecimal(rec.bestRow().stockoutProbability() * 5, 1, 1)}"></strong> dnia/tydzień,
+        <strong th:text="${#numbers.formatDecimal(rec.bestRow().stockoutProbability() * 5 * 4.33, 1, 1)}"></strong> dnia/miesiąc)
+        zabraknie Ci towaru dla klienta, a średnio
+        <strong th:text="${#numbers.formatDecimal(rec.bestRow().avgWasted(), 1, 1)}"></strong> szt tygodniowo
+        wyprodukujesz na wyrzucenie.
+    </p>
+</div>
+
+<p style="background:#e3edf9; border-left:5px solid #3d6fa8; padding:16px 20px; margin:22px 0; font-size:16px; line-height:1.6; color:#1f3a5f; border-radius:4px;">
+    Poniższa tabela pokazuje, jak zmienia się wynik przy różnych poziomach zatowarowania —
+    im wyższy poziom, tym wyższy potencjalny zysk, ale też wyższe ryzyko marnowania i większe wahania.
+    Wiersz z rekomendacją leży zwykle w okolicy szczytu kolumny „Zysk skorygowany o ryzyko”.
+</p>
+
+<table>
+    <tr>
+        <th>Zatowarowanie<br><small>(szt/dzień)</small></th>
+        <th>Śr. zysk tygodniowy<br><small>(zł)</small></th>
+        <th>Odchylenie<br><small>(zł)</small></th>
+        <th>Zysk skorygowany o ryzyko<br><small>(zł)</small></th>
+        <th>Zysk w najgorszych 5% tygodni<br><small>(zł)</small></th>
+        <th>Średnia ilość zmarnowanych<br><small>(szt)</small></th>
+        <th>Ryzyko braku towaru<br><small>(% dni)</small></th>
+    </tr>
+    <tr th:each="row : ${coarseResult.rowResults()}">
+        <td th:text="${row.baseStock()} + ' szt'"></td>
+        <td th:text="${#numbers.formatDecimal(row.mean(), 1, 1)} + ' zł'"></td>
+        <td th:text="${#numbers.formatDecimal(row.stdDev(), 1, 1)} + ' zł'"></td>
+        <td th:text="${#numbers.formatDecimal(row.target(), 1, 1)} + ' zł'"></td>
+        <td th:text="${#numbers.formatDecimal(row.cVar5(), 1, 1)} + ' zł'"></td>
+        <td th:text="${#numbers.formatDecimal(row.avgWasted(), 1, 1)} + ' szt'"></td>
+        <td th:text="${#numbers.formatDecimal(row.stockoutProbability() * 100, 1, 0)} + '%'"></td>
+    </tr>
+</table>
+
+<!-- ============ GRANICA: koniec wyników bazowych, początek eksperymentów ============ -->
+<div style="margin:50px 0 24px 0; padding:22px 24px; background:#2c3e50; color:#fff; border-radius:8px;">
+    <div style="font-size:13px; text-transform:uppercase; letter-spacing:1.5px; opacity:0.7; margin-bottom:8px;">
+        Sekcja eksperymentów
+    </div>
+    <div style="font-size:22px; font-weight:bold; margin-bottom:8px;">
+        Sprawdź własne warianty
+    </div>
+    <div style="font-size:16px; line-height:1.6; opacity:0.9; max-width:700px;">
+        Powyżej masz wynik symulacji dla domyślnych założeń. Poniżej możesz porównać z nimi
+        własną strategię zatowarowania oraz sprawdzić, co się stanie, jeśli popyt w danym dniu
+        okaże się inny niż zakładany.
+    </div>
+</div>
+
+<form method="get" action="/#user-strategy-result" class="day-form">
+    <input type="hidden" name="product" th:value="${selectedProduct}">
+    <div style="margin-bottom:16px;">
+        <strong style="display:block; font-size:17px; margin-bottom:6px;">Twoja strategia zatowarowania</strong>
+        <span style="display:block; font-size:15px; color:#555; max-width:640px; line-height:1.5;">
+            Ile sztuk chcesz mieć na stanie każdego dnia — Twoja własna propozycja do porównania z rekomendacją algorytmu.
+        </span>
+    </div>
+
+    <div style="display:flex; flex-direction:row; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+        <div th:each="dayName, iter : ${#lists.toList({'Wt','Śr','Czw','Pt','Sob'})}"
+             style="display:flex; flex-direction:column; align-items:center;">
+            <label th:text="${dayName}" th:for="${'targetDay' + (iter.index + 1)}"
+                   style="font-size:14px; color:#444; margin-bottom:6px; font-weight:600;"></label>
+            <input type="number" min="0"
+                   th:id="${'targetDay' + (iter.index + 1)}" th:name="${'targetDay' + (iter.index + 1)}"
+                   th:value="${userTargetByDay != null ? userTargetByDay[iter.index] : ''}" placeholder="0"
+                   style="width:46px; padding:7px 0; text-align:center; border:1px solid #bbb; border-radius:4px; font-size:16px; box-sizing:content-box;">
+        </div>
+    </div>
+
+    <div style="margin:16px 0; padding:12px 16px; background:rgba(0,0,0,0.05); border-radius:6px;">
+        <div style="font-size:14px; font-weight:600; color:#555; margin-bottom:8px;">Punkt odniesienia — szacowany popyt</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px 20px;">
+            <span th:each="dayName, iter : ${#lists.toList({'Wt','Śr','Czw','Pt','Sob'})}" style="font-size:15px; white-space:nowrap;">
+                <span th:text="${dayName}"></span>: <strong th:text="${#numbers.formatDecimal(baseDemandByDay[iter.index], 1, 1)}"></strong> szt
+            </span>
+        </div>
+    </div>
+
+    <button type="submit">Porównaj ze swoją strategią</button>
+</form>
+
+<div class="recommendation" id="user-strategy-result" th:if="${userResult != null}" style="background:#fff3cd; border-color:#ffc107;">
+    <h2>Twoja strategia vs rekomendacja</h2>
+    <p class="params-line">
+        Zatowarowanie: <strong th:each="v, iter : ${userTargetByDay}" th:text="${v} + (${iter.last} ? '' : ', ')"></strong> szt (kolejno dni 1–5)
+    </p>
+
+    <table style="margin-top:10px;">
+        <tr>
+            <th></th>
+            <th style="background:#b8860b; color:#fff;">Twoja strategia</th>
+            <th style="background:#1e7e34; color:#fff;">Rekomendacja</th>
+            <th>Różnica</th>
+        </tr>
+        <tr>
+            <td>Zysk skorygowany o ryzyko</td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(userResult.target(), 1, 1)} + ' zł'"></td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().target(), 1, 1)} + ' zł'"></td>
+            <td th:text="${#numbers.formatDecimal(userResult.target() - fineResult.bestRow().target(), 1, 1)} + ' zł'"
+                th:style="${userResult.target() >= fineResult.bestRow().target()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+        <tr>
+            <td>Najgorsze 5% scenariuszy</td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(userResult.cVar5(), 1, 1)} + ' zł'"></td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().cVar5(), 1, 1)} + ' zł'"></td>
+            <td th:text="${#numbers.formatDecimal(userResult.cVar5() - fineResult.bestRow().cVar5(), 1, 1)} + ' zł'"
+                th:style="${userResult.cVar5() >= fineResult.bestRow().cVar5()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+        <tr>
+            <td>Śr. marnowanie</td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(userResult.avgWasted(), 1, 1)} + ' szt'"></td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().avgWasted(), 1, 1)} + ' szt'"></td>
+            <td th:text="${#numbers.formatDecimal(userResult.avgWasted() - fineResult.bestRow().avgWasted(), 1, 1)} + ' szt'"
+                th:style="${userResult.avgWasted() <= fineResult.bestRow().avgWasted()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+        <tr>
+            <td>Ryzyko braku towaru</td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(userResult.stockoutProbability() * 100, 1, 0)} + '%'"></td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().stockoutProbability() * 100, 1, 0)} + '%'"></td>
+            <td th:text="${#numbers.formatDecimal((userResult.stockoutProbability() - fineResult.bestRow().stockoutProbability()) * 100, 1, 0)} + '%'"
+                th:style="${userResult.stockoutProbability() <= fineResult.bestRow().stockoutProbability()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+        <tr>
+            <td>Śr. wylosowany popyt</td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(userResult.avgDemand(), 1, 1)} + ' szt'"></td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().avgDemand(), 1, 1)} + ' szt'"></td>
+            <td th:text="${#numbers.formatDecimal(userResult.avgDemand() - fineResult.bestRow().avgDemand(), 1, 1)} + ' szt'"></td>
+        </tr>
+        <tr>
+            <td>Śr. faktyczna sprzedaż</td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(userResult.avgSold(), 1, 1)} + ' szt'"></td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().avgSold(), 1, 1)} + ' szt'"></td>
+            <td th:text="${#numbers.formatDecimal(userResult.avgSold() - fineResult.bestRow().avgSold(), 1, 1)} + ' szt'"
+                th:style="${userResult.avgSold() >= fineResult.bestRow().avgSold()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+    </table>
+    <p style="margin-top:14px; font-size:16px;">
+        <strong th:if="${userResult.target() >= fineResult.bestRow().target()}">
+            Twoja strategia radzi sobie lepiej niż rekomendacja algorytmu o
+            <span th:text="${#numbers.formatDecimal(userResult.target() - fineResult.bestRow().target(), 1, 1)}"></span> zł/tydz. —
+            dobrze dopasowałeś zatowarowanie do tego, jak zmienia się popyt w ciągu tygodnia.
+        </strong>
+        <strong th:unless="${userResult.target() >= fineResult.bestRow().target()}">
+            Rekomendacja algorytmu wypada lepiej o
+            <span th:text="${#numbers.formatDecimal(fineResult.bestRow().target() - userResult.target(), 1, 1)}"></span> zł/tydz.
+            Zerknij na szacowany popyt przy polach powyżej — Twoje wartości mogą nie nadążać
+            za wzrostem popytu w mocniejsze dni tygodnia (zwłaszcza w sobotę).
+        </strong>
+    </p>
+</div>
+
+<form method="get" action="/#scenario-result" class="day-form">
+    <input type="hidden" name="product" th:value="${selectedProduct}">
+    <input type="hidden" name="targetDay1" th:value="${userTargetByDay != null ? userTargetByDay[0] : ''}">
+    <input type="hidden" name="targetDay2" th:value="${userTargetByDay != null ? userTargetByDay[1] : ''}">
+    <input type="hidden" name="targetDay3" th:value="${userTargetByDay != null ? userTargetByDay[2] : ''}">
+    <input type="hidden" name="targetDay4" th:value="${userTargetByDay != null ? userTargetByDay[3] : ''}">
+    <input type="hidden" name="targetDay5" th:value="${userTargetByDay != null ? userTargetByDay[4] : ''}">
+    <div style="margin-bottom:16px;">
+        <strong style="display:block; font-size:17px; margin-bottom:6px;">Co jeśli popyt się zmieni?</strong>
+        <span style="display:block; font-size:15px; color:#555; max-width:640px; line-height:1.5;">
+            O ile procent podnieść lub obniżyć szacowany popyt w danym dniu, np. z powodu pogody
+            czy wydarzenia w mieście. 0 = bez zmian.
+        </span>
+    </div>
+
+    <div style="display:flex; flex-direction:row; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
+        <div th:each="dayName, iter : ${#lists.toList({'Wt','Śr','Czw','Pt','Sob'})}"
+             style="display:flex; flex-direction:column; width:92px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:15px;">
+                <span th:text="${dayName}" style="font-weight:600; color:#444;"></span>
+                <output th:id="${'demandAdj' + (iter.index + 1) + 'Out'}"
+                        th:text="${(demandAdjByDay != null ? demandAdjByDay[iter.index] : 0)} + '%'"
+                        style="font-weight:bold; color:#222;"></output>
+            </div>
+            <input type="range" min="-80" max="150" step="5"
+                   th:id="${'demandAdj' + (iter.index + 1)}" th:name="${'demandAdj' + (iter.index + 1)}"
+                   th:value="${demandAdjByDay != null ? demandAdjByDay[iter.index] : 0}"
+                   style="width:92px; margin:0;"
+                   th:attr="oninput=|document.getElementById('demandAdj${iter.index + 1}Out').textContent = this.value + '%'|">
+        </div>
+    </div>
+
+    <div style="margin:16px 0; padding:12px 16px; background:rgba(0,0,0,0.05); border-radius:6px;">
+        <div style="font-size:14px; font-weight:600; color:#555; margin-bottom:8px;">Punkt odniesienia — szacowany popyt</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px 20px;">
+            <span th:each="dayName, iter : ${#lists.toList({'Wt','Śr','Czw','Pt','Sob'})}" style="font-size:15px; white-space:nowrap;">
+                <span th:text="${dayName}"></span>: <strong th:text="${#numbers.formatDecimal(baseDemandByDay[iter.index], 1, 1)}"></strong> szt
+            </span>
+        </div>
+    </div>
+
+    <button type="submit">Przelicz scenariusz</button>
+</form>
+
+<div class="recommendation" id="scenario-result" th:if="${baselineFineResult != null}" style="background:#e2e3ff; border-color:#6c63ff;">
+    <h2>Wpływ zmiany popytu na wynik</h2>
+
+    <p class="params-line">
+        Wprowadzone zmiany popytu:
+        <span th:each="dayName, iter : ${#lists.toList({'Wt','Śr','Czw','Pt','Sob'})}"
+              th:if="${demandAdjByDay[iter.index] != 0}">
+            <span th:text="${dayName}"></span>:
+            <strong th:text="${(demandAdjByDay[iter.index] > 0 ? '+' : '') + demandAdjByDay[iter.index]}"></strong>%<span th:text="${iter.last ? '' : ', '}"></span>
+        </span>
+    </p>
+
+    <table style="margin-top:10px;">
+        <tr>
+            <th></th>
+            <th style="background:#1e7e34; color:#fff;">Normalne warunki</th>
+            <th style="background:#b8860b; color:#fff;">Przy tej zmianie</th>
+            <th>Różnica</th>
+        </tr>
+        <tr>
+            <td>Zysk skorygowany o ryzyko</td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(baselineFineResult.bestRow().target(), 1, 1)} + ' zł'"></td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().target(), 1, 1)} + ' zł'"></td>
+            <td th:text="${#numbers.formatDecimal(fineResult.bestRow().target() - baselineFineResult.bestRow().target(), 1, 1)} + ' zł'"
+                th:style="${fineResult.bestRow().target() >= baselineFineResult.bestRow().target()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+        <tr>
+            <td>Rekomendowane S</td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${baselineFineResult.bestRow().baseStock()} + ' szt'"></td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${fineResult.bestRow().baseStock()} + ' szt'"></td>
+            <td th:text="${(fineResult.bestRow().baseStock() - baselineFineResult.bestRow().baseStock())} + ' szt'"></td>
+        </tr>
+        <tr>
+            <td>Ryzyko braku towaru</td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(baselineFineResult.bestRow().stockoutProbability() * 100, 1, 0)} + '%'"></td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().stockoutProbability() * 100, 1, 0)} + '%'"></td>
+            <td th:text="${#numbers.formatDecimal((fineResult.bestRow().stockoutProbability() - baselineFineResult.bestRow().stockoutProbability()) * 100, 1, 0)} + '%'"
+                th:style="${fineResult.bestRow().stockoutProbability() <= baselineFineResult.bestRow().stockoutProbability()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+        <tr>
+            <td>Śr. marnowanie</td>
+            <td style="background:#dff3e3; font-weight:600;" th:text="${#numbers.formatDecimal(baselineFineResult.bestRow().avgWasted(), 1, 1)} + ' szt'"></td>
+            <td style="background:#fdf3d3; font-weight:600;" th:text="${#numbers.formatDecimal(fineResult.bestRow().avgWasted(), 1, 1)} + ' szt'"></td>
+            <td th:text="${#numbers.formatDecimal(fineResult.bestRow().avgWasted() - baselineFineResult.bestRow().avgWasted(), 1, 1)} + ' szt'"
+                th:style="${fineResult.bestRow().avgWasted() <= baselineFineResult.bestRow().avgWasted()} ? 'color:green;font-weight:bold' : 'color:#c0392b;font-weight:bold'"></td>
+        </tr>
+    </table>
+
+    <p style="margin-top:14px; font-size:16px;">
+        Ta zmiana popytu zmienia zysk skorygowany o ryzyko o
+        <strong th:text="${#numbers.formatDecimal(fineResult.bestRow().target() - baselineFineResult.bestRow().target(), 1, 1)}"></strong> zł/tydz.
+        względem normalnych warunków, i sugeruje
+        <span th:if="${fineResult.bestRow().baseStock() != baselineFineResult.bestRow().baseStock()}">
+            zmianę zatowarowania z <strong th:text="${baselineFineResult.bestRow().baseStock()}"></strong>
+            na <strong th:text="${fineResult.bestRow().baseStock()}"></strong> szt dziennie.
+        </span>
+        <span th:unless="${fineResult.bestRow().baseStock() != baselineFineResult.bestRow().baseStock()}">
+            utrzymanie tego samego poziomu zatowarowania.
+        </span>
+    </p>
+</div>
+
+<p style="color:#999; font-size:13px;">Czas obliczeń: <span th:text="${elapsedMs}"></span> ms</p>
+</body>
+</html>
