@@ -144,7 +144,7 @@
                    style="font-size:14px; color:#444; margin-bottom:6px; font-weight:600;"></label>
             <input type="number" min="0"
                    th:id="${'targetDay' + (iter.index + 1)}" th:name="${'targetDay' + (iter.index + 1)}"
-                   th:value="${userTargetByDay != null ? userTargetByDay[iter.index] : ''}" placeholder="0"
+                   th:value="${userTargetByDay != null ? userTargetByDay[iter.index] : #numbers.formatInteger(baseDemandByDay[iter.index], 0)}"
                    style="width:46px; padding:7px 0; text-align:center; border:1px solid #bbb; border-radius:4px; font-size:16px; box-sizing:content-box;">
         </div>
     </div>
