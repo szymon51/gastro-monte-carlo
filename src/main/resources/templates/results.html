@@ -68,14 +68,15 @@
 
     <p style="font-size:16px; line-height:1.7; margin-top:14px; padding-top:14px; border-top:1px solid rgba(0,0,0,0.15);">
         Przy zatowarowaniu <strong th:text="${rec.bestRow().baseStock()}"></strong> szt dziennie:
-        w typowym tygodniu zarobisz około
-        <strong th:text="${#numbers.formatDecimal(rec.bestRow().target(), 1, 0)}"></strong> zł
-        (średni zysk <strong th:text="${#numbers.formatDecimal(rec.bestRow().mean(), 1, 0)}"></strong> zł, skorygowany o ryzyko wahań),
-        sprzedając średnio <strong th:text="${#numbers.formatDecimal(rec.bestRow().avgSold(), 1, 1)}"></strong> szt tygodniowo
-        z <strong th:text="${#numbers.formatDecimal(rec.bestRow().avgDemand(), 1, 1)}"></strong> szt szacowanego popytu,
+        średnio zarobisz około
+        <strong th:text="${#numbers.formatDecimal(rec.bestRow().mean(), 1, 0)}"></strong> zł tygodniowo,
         ale licz się z wahaniami rzędu ±<strong th:text="${#numbers.formatDecimal(rec.bestRow().stdDev(), 1, 0)}"></strong> zł
-        w zależności od tygodnia.
-        W najgorszych 5% przypadków (mniej więcej raz na miesiąc) zarobisz tylko około
+        w zależności od tygodnia. Uwzględniając to ryzyko, algorytm ocenia ten poziom na
+        <strong th:text="${#numbers.formatDecimal(rec.bestRow().target(), 1, 0)}"></strong> zł/tydz. zysku skorygowanego o ryzyko —
+        to kryterium, według którego wybrano ten poziom zatowarowania.
+        Sprzedajesz średnio <strong th:text="${#numbers.formatDecimal(rec.bestRow().avgSold(), 1, 1)}"></strong> szt tygodniowo
+        z <strong th:text="${#numbers.formatDecimal(rec.bestRow().avgDemand(), 1, 1)}"></strong> szt szacowanego popytu.
+        W najgorszych 5% przypadków (mniej więcej raz na 20 tygodni, czyli raz na 4-5 miesięcy) zarobisz tylko około
         <strong th:text="${#numbers.formatDecimal(rec.bestRow().cVar5(), 1, 0)}"></strong> zł.
         Przy tym poziomie zatowarowania w <strong th:text="${#numbers.formatDecimal(rec.bestRow().stockoutProbability() * 100, 1, 0)}"></strong>%
         dni (ok. <strong th:text="${#numbers.formatDecimal(rec.bestRow().stockoutProbability() * 5, 1, 1)}"></strong> dnia/tydzień,
@@ -90,6 +91,9 @@
     Poniższa tabela pokazuje, jak zmienia się wynik przy różnych poziomach zatowarowania —
     im wyższy poziom, tym wyższy potencjalny zysk, ale też wyższe ryzyko marnowania i większe wahania.
     Wiersz z rekomendacją leży zwykle w okolicy szczytu kolumny „Zysk skorygowany o ryzyko”.
+    Tabela to ogólny podgląd trendu (mniej iteracji Monte Carlo, dla szybkości) — dokładna
+    rekomendacja powyżej pochodzi z osobnego, dokładniejszego przeliczenia wokół optymalnego poziomu zatowarowania,
+    więc liczby mogą się nieznacznie różnić od najbliższego wiersza w tabeli.
 </p>
 
 <table>
