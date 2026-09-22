@@ -5,7 +5,11 @@ Symulacja Monte Carlo do optymalizacji zatowarowania na stoisku gastro (ciasta, 
 Zamiast zgadywać ile produkować dziennie, program symuluje tysiące wariantów tygodnia
 z losowym popytem i szuka poziomu zatowarowania, który maksymalizuje zysk skorygowany o ryzyko.
 
+![Zrzut ekranu aplikacji](docs/screenshot.png)
+
 ## Problem
+Aplikacja powstała na potrzeby firmy, w której pracuję, i jest na bieżąco używana
+przez osoby decyzyjne przy planowaniu codziennej produkcji na stoisku.
 
 Klasyczny newsvendor problem: produkujesz za mało — tracisz sprzedaż, produkujesz za dużo —
 marnujesz towar (zwłaszcza przy krótkim terminie ważności). Popyt jest niepewny i różni się
@@ -29,8 +33,16 @@ oczekiwany zysk i ryzyko złego tygodnia.
 
 ## Stack
 
-Java 17 / Spring Boot / Thymeleaf. Zero baz danych — wszystko liczone na żądanie,
+Java 17 / Spring Boot / Thymeleaf. Na razie zero baz danych — wszystko liczone na żądanie,
 w pamięci, przy każdym odświeżeniu strony.
+
+## Uruchomienie
+
+Wymagania: Java 17, Maven.
+
+    mvn spring-boot:run
+
+Aplikacja będzie dostępna pod adresem http://localhost:8080
 
 ## Co można zrobić w interfejsie
 
@@ -41,6 +53,8 @@ w pamięci, przy każdym odświeżeniu strony.
   różnica w wyniku to realna różnica strategii, nie szum.
 - Sprawdzić what-if: co się zmieni, jeśli popyt w danym dniu wzrośnie/spadnie o X%
   (np. przez pogodę albo wydarzenie w mieście).
+- Sprawdzić, ile dziś dopiec: po podaniu dnia tygodnia i aktualnego stanu magazynu
+    aplikacja wylicza, ile sztuk wyprodukować zgodnie z rekomendowaną strategią.
 
 ## Co jest uproszczone (świadomie)
 
